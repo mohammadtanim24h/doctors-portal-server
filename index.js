@@ -18,13 +18,40 @@ async function run() {
     try {
         await client.connect();
         const serviceCollection = client.db("doctorsPortal").collection("services");
+        const bookingCollection = client.db("doctorsPortal").collection("bookings");
 
+        // Get all services
         app.get("/services", async (req, res) => {
             const query = {};
             const cursor = serviceCollection.find(query);
             const services = await cursor.toArray();
             res.send(services);
         })
+
+        /**
+         * API Naming Convention
+         * app.get('/booking') // get all bookings in this collection. or get more than one or by filter
+         * app.get('/booking/:id') // get a specific booking 
+         * app.post('/booking') // add a new booking
+         * app.patch('/booking/:id) // update a single booking
+         * app.delete('/booking/:id) // delete a booking
+        */
+
+        // Create a booking
+        app.post("/booking", async (req, res) => {
+            const booking = req.body;
+            // check kora hocche je ekta particular din er moddhe ekjon user je treatment book korte chaitase oi treatment oi user er jonno oi din er moddhe already booked ase kina. already booked thakle ar book korte dibo na.
+            const query = {treatment: booking.treatment, date: booking.date, patientEmail: booking.patientEmail};
+            console.log(query);
+            const exists = await bookingCollection.findOne(query);
+            if(exists){
+                return res.send({success: false, booking: exists});
+            }
+            // jodi already book kora na thake tahole book korte dibo.
+            const result = await bookingCollection.insertOne(booking);
+            return res.send({success: true, result});
+        })
+
     }
     finally {
 
