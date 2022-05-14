@@ -69,6 +69,13 @@ async function run() {
          * app.patch('/booking/:id) // update a single booking
          * app.delete('/booking/:id) // delete a booking
         */
+        // Get bookings by email
+        app.get("/booking", async (req, res) => {
+            const patientEmail = req.query.email;
+            const query ={patientEmail};
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings);
+        })
 
         // Create a booking
         app.post("/booking", async (req, res) => {
