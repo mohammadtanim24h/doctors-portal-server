@@ -28,6 +28,39 @@ async function run() {
             res.send(services);
         })
 
+
+        // This is not the perfect way to query. After learning more about mongodb use aggregate, lookup, pipeline, group, mathc
+        // Get Available appointments
+        app.get("/available", async (req, res) => {
+            const date = req.query.date;
+
+            // step 1: get all services
+            const services = await serviceCollection.find({}).toArray();
+
+            // step 2 : get the bookings of that day
+            const query = {date: date};
+            const bookings = await bookingCollection.find(query).toArray();
+            
+
+            // step 3: for each service
+            services.forEach(service => {
+                // step 4:  find bookings for that service | output : [{obj}, {obj}, {obj}, {obj}, {obj}....]
+                // prottekta service nibo and oi service er jonno ki ki bookings ase oigula niye ashbo. kuno ekta service er booking thakteo pare nao thakte pare.
+                const serviceBookings = bookings.filter(booking => booking.treatment === service.name);
+                
+                // step 5 : select booked slots of the service | output : ['', '', '', '',]
+                const bookedSlots = serviceBookings.map(booking => booking.slot);
+                // step 6 : select those slots that are not in booked slots
+                const available = service.slots.filter(slot => !bookedSlots.includes(slot));
+                // step 7 : replace all slots with available slots
+                service.slots = available;
+            });
+
+            // ekhane services gula change hocche kibhabe? foreach kibhabe modify kortese service gulake?
+            res.send(services);
+        })
+
+
         /**
          * API Naming Convention
          * app.get('/booking') // get all bookings in this collection. or get more than one or by filter
