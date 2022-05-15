@@ -47,11 +47,23 @@ async function run() {
             res.send(services);
         })
 
-        app.get("/users", async (req, res) => {
+        app.get("/users", verifyJWT, async (req, res) => {
             const users = await userCollection.find({}).toArray();
             res.send(users)
         })
 
+        // make admin
+        app.put("/user/admin/:email", verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const filter = {email};
+            const updateDoc = {
+                $set: {role: 'admin'},
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+        // add or update user in db
         app.put("/user/:email", async (req, res) => {
             const email = req.params.email;
             const user = req.body;
@@ -62,7 +74,7 @@ async function run() {
             };
             const result = await userCollection.updateOne(filter, updateDoc, options);
             // signing token
-            const token = jwt.sign({email}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'});
+            const token = jwt.sign({email}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1d'});
             res.send({result, token});
         })
 
