@@ -19,6 +19,7 @@ async function run() {
         await client.connect();
         const serviceCollection = client.db("doctorsPortal").collection("services");
         const bookingCollection = client.db("doctorsPortal").collection("bookings");
+        const userCollection = client.db("doctorsPortal").collection("users");
 
         // Get all services
         app.get("/services", async (req, res) => {
@@ -28,6 +29,17 @@ async function run() {
             res.send(services);
         })
 
+        app.put("/user/:email", async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = {email};
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
 
         // This is not the perfect way to query. After learning more about mongodb use aggregate, lookup, pipeline, group, mathc
         // Get Available appointments
@@ -67,9 +79,11 @@ async function run() {
          * app.get('/booking/:id') // get a specific booking 
          * app.post('/booking') // add a new booking
          * app.patch('/booking/:id) // update a single booking
+         * app.put('/booking/:id) // upsert => update(if exists) / insert (if doesn't exist)
          * app.delete('/booking/:id) // delete a booking
         */
-        // Get bookings by email
+       
+        // Get bookings for specific email
         app.get("/booking", async (req, res) => {
             const patientEmail = req.query.email;
             const query ={patientEmail};
