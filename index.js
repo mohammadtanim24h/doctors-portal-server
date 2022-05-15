@@ -1,5 +1,6 @@
 const express = require("express");
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const jwt = require('jsonwebtoken');
 const cors = require("cors");
 require('dotenv').config();
 const app = express();
@@ -13,6 +14,8 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.51ygh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+
 
 async function run() {
     try {
@@ -38,7 +41,9 @@ async function run() {
                 $set: user,
             };
             const result = await userCollection.updateOne(filter, updateDoc, options);
-            res.send(result);
+            // signing token
+            const token = jwt.sign({email}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'});
+            res.send({result, token});
         })
 
         // This is not the perfect way to query. After learning more about mongodb use aggregate, lookup, pipeline, group, mathc
@@ -86,6 +91,8 @@ async function run() {
         // Get bookings for specific email
         app.get("/booking", async (req, res) => {
             const patientEmail = req.query.email;
+            const authHeader = req.headers.authorization;
+            console.log(authHeader);
             const query ={patientEmail};
             const bookings = await bookingCollection.find(query).toArray();
             res.send(bookings);
