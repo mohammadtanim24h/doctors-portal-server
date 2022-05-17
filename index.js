@@ -85,7 +85,7 @@ async function run() {
             const filter = {email};
             const options = { upsert: true };
             const updateDoc = {
-                $set: user,
+                $set: user, // {email: example@gmail.com}
             };
             const result = await userCollection.updateOne(filter, updateDoc, options);
             // signing token
