@@ -181,6 +181,14 @@ async function run() {
             res.send(result);
         })
 
+        // delete a doctor in db
+        app.delete("/doctor/:email", verifyJWT, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+            const query = {email};
+            const result = await doctorCollection.deleteOne(query);
+            res.send(result);
+        })
+
 
     }
     finally {
