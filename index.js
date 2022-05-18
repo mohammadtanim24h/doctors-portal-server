@@ -168,6 +168,12 @@ async function run() {
             return res.send({success: true, result});
         })
 
+        // get all doctors
+        app.get("/doctors", verifyJWT, verifyAdmin, async (req, res) => {
+            const doctors = await doctorCollection.find({}).toArray();
+            res.send(doctors);
+        })
+
         // add doctor in db
         app.post("/doctor", verifyJWT, verifyAdmin, async (req, res) => {
             const doctor = req.body;
