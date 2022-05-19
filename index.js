@@ -181,7 +181,7 @@ async function run() {
             res.send(result);
         })
 
-        // delete a doctor in db
+        // delete a doctor from db
         app.delete("/doctor/:email", verifyJWT, verifyAdmin, async (req, res) => {
             const email = req.params.email;
             const query = {email};
