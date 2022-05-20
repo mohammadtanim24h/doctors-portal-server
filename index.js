@@ -3,6 +3,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const cors = require("cors");
 require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -153,6 +155,7 @@ async function run() {
             }
         })
 
+        // get a spicific booking 
         app.get("/booking/:id", verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
